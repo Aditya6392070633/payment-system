@@ -1,0 +1,10 @@
+﻿services:
+  - type: web
+    name: payment-system
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: dev
