@@ -1,0 +1,36 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:paymentdb}
+    driver-class-name: org.postgresql.Driver
+    username: ${DB_USERNAME:payment_user}
+    password: ${DB_PASSWORD:changeit}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BROKERS:localhost:9092}
+    consumer:
+      group-id: payment-system
+      auto-offset-reset: earliest
+    producer:
+      acks: all
+      retries: 3
+
+payment:
+  event-bus: kafka
+  crypto:
+    secret-key: ${PAYMENT_ENCRYPTION_KEY}   # inject from HashiCorp Vault / AWS KMS at deploy time
+
+# NOTE: Vault / KMS integration for secrets and PCI-DSS field-level encryption
+# should be wired here via spring-cloud-vault or AWS SDK in a real deployment.
+# This skeleton keeps the interface (EncryptionUtil) provider-agnostic so the
+# backing key source can be swapped without touching business logic.
