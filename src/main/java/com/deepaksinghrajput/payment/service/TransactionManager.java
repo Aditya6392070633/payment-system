@@ -17,7 +17,7 @@ import java.util.Set;
  * Owns the payment status state machine so transitions can never happen
  * out of order (e.g. CAPTURED -> AUTHORIZED, or REFUNDED -> CAPTURED).
  */
-@Service
+@Service("paymentStatusTransactionManager")
 @RequiredArgsConstructor
 public class TransactionManager {
 
