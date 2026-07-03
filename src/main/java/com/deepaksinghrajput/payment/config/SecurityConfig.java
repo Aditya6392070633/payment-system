@@ -1,20 +1,18 @@
 package com.deepaksinghrajput.payment.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
-/**
- * Baseline security config: stateless API secured with HTTP Basic / bearer
- * auth at the gateway layer in production (Kong / Spring Cloud Gateway per
- * the architecture diagram). Swap in JWT/OAuth2 resource-server config here
- * for real deployments.
- */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -29,7 +27,7 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
             )
             .httpBasic(basic -> {})
-            .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin())); // needed for h2-console in dev
+            .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()));
 
         return http.build();
     }
@@ -37,5 +35,19 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public UserDetailsService userDetailsService(
+            PasswordEncoder passwordEncoder,
+            @Value("${APP_USERNAME:admin}") String username,
+            @Value("${APP_PASSWORD:admin}") String password) {
+
+        return new InMemoryUserDetailsManager(
+                User.withUsername(username)
+                        .password(passwordEncoder.encode(password))
+                        .roles("USER")
+                        .build()
+        );
     }
 }
